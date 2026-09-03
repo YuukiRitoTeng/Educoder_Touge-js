@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name         TG任务状态后台扫描器
 // @namespace    tg-task-monitor
-// @version      3.1
+// @version      3.2
+// @updateURL    https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务状态后台扫描器.js
+// @downloadURL  https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务状态后台扫描器.js
 // @description  后台扫描 TG/Educoder 课堂考试、小测试和图文作业状态，并保存到共享存储
 // @author       ChatGPT
 // @background
