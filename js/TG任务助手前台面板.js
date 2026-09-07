@@ -6239,7 +6239,7 @@
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: ["href", "data-id", "data-exercise-id", "data-homework-id"]
+        attributeFilter: ["href", "data-id", "data-exercise-id", "data-exerciseid", "data-homework-id", "data-homeworkid"]
       });
       timerId = setInterval(attempt, 400);
       deadlineTimerId = setTimeout(() => finish({ match: null, highlight: null }), Math.max(0, deadline - Date.now()));
