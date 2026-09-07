@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG任务助手前台面板
 // @namespace    tg-task-monitor-ui
-// @version      3.2
+// @version      3.3
 // @updateURL    https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务助手前台面板.js
 // @downloadURL  https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务助手前台面板.js
 // @description  读取 TG任务状态后台扫描器 的共享结果，在 TG 页面右下角显示任务助手抽屉
@@ -93,6 +93,7 @@
   let adaptiveDetectTimerId = null;
   let adaptiveScrollTimerId = null;
   let adaptiveListenersAttached = false;
+  let pendingNavigationResolvePromise = null;
   let initialHydrationTraceActive = true;
   const initialHydrationTraceOnce = new Set();
   const LAUNCHER_IDLE_MS = 11000;
@@ -3706,9 +3707,11 @@
     const button = document.getElementById(BUTTON_ID);
     const drawer = document.getElementById(DRAWER_ID);
     const state = panelState || await loadPanelState();
+    const launcherSettings = normalizeLauncherSettings(
+      state?.launcherSettings || await loadLauncherSettings()
+    );
 
     if (button) {
-      const launcherSettings = normalizeLauncherSettings(await loadLauncherSettings());
       const launcherHeight = button.getBoundingClientRect().height || 52;
       const savedY = launcherSettings.y ?? state.launcherY ?? state.buttonY ?? window.innerHeight - launcherHeight - 104;
       const y = clamp(Number(savedY) || 0, 12, Math.max(12, window.innerHeight - launcherHeight - 12));
@@ -6046,13 +6049,21 @@
     const taskId = getPendingTaskId(task, type);
     const courseId = resolveJumpCourseId(task);
     if (!taskId || !courseId) throw new Error("任务缺少父列表定位信息");
-    await setValue(STORE_KEY_PENDING_TASK_NAVIGATION, {
+    const pending = {
       originHost: location.hostname,
       taskType: type,
       courseId: String(courseId),
       taskId,
       title: String(getTaskTitle(task) || "").trim(),
       createdAt: Date.now()
+    };
+    await setValue(STORE_KEY_PENDING_TASK_NAVIGATION, pending);
+    console.info("[TG nav] pending-saved", {
+      originHost: pending.originHost,
+      courseId: pending.courseId,
+      taskType: pending.taskType,
+      taskId: pending.taskId,
+      title: pending.title
     });
   }
 
@@ -6060,33 +6071,48 @@
     return node?.closest?.('[class*="listItem"], [class*="listContainer"], [class*="homeworkItem"], li, article, [role="listitem"]') || node;
   }
 
-  function findPendingTaskNode(pending) {
+  function findPendingTaskNode(pending, diagnostics = {}) {
     const path = location.pathname;
     const expectedSuffix = `/classrooms/${encodeURIComponent(pending.courseId)}/${pending.taskType}`;
+    diagnostics.path = path;
+    diagnostics.expectedPath = expectedSuffix;
     if (path !== expectedSuffix && !path.endsWith(`/${pending.taskType}`)) return null;
 
     const id = String(pending.taskId);
     const idAttrs = ["data-id", "data-exercise-id", "data-exerciseid", "data-homework-id", "data-homeworkid"];
     for (const attr of idAttrs) {
-      const match = Array.from(document.querySelectorAll(`[${attr}]`)).find(el => String(el.getAttribute(attr)) === id);
-      if (match) return getPendingRow(match);
+      const matches = Array.from(document.querySelectorAll(`[${attr}]`));
+      diagnostics.dataAttrMatches = (diagnostics.dataAttrMatches || 0) + matches.filter(el => String(el.getAttribute(attr)) === id).length;
+      const match = matches.find(el => String(el.getAttribute(attr)) === id);
+      if (match) return { node: getPendingRow(match), method: "DATA_ATTR" };
     }
 
-    const hrefMatch = Array.from(document.querySelectorAll("a[href]"))
-      .find(link => new URL(link.href, location.href).pathname.split("/").includes(id));
-    if (hrefMatch) return getPendingRow(hrefMatch);
+    const hrefMatches = Array.from(document.querySelectorAll("a[href]")).filter(link => {
+      try {
+        return new URL(link.href, location.href).pathname.split("/").includes(id);
+      } catch (_) {
+        return false;
+      }
+    });
+    diagnostics.hrefMatches = hrefMatches.length;
+    if (hrefMatches[0]) return { node: getPendingRow(hrefMatches[0]), method: "HREF" };
 
     if (!pending.title) return null;
     const titleNode = Array.from(document.querySelectorAll("span, a, h1, h2, h3, p, div"))
       .find(el => el !== document.body && el.children.length < 3 && el.textContent.trim() === pending.title);
-    return getPendingRow(titleNode);
+    diagnostics.titleMatches = titleNode ? 1 : 0;
+    return titleNode ? { node: getPendingRow(titleNode), method: "TITLE" } : null;
   }
 
   function sleepForPendingNavigation(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function resolvePendingTaskNavigation() {
+  function pendingNavigationKey(pending) {
+    return [pending?.originHost, pending?.courseId, pending?.taskType, pending?.taskId, pending?.createdAt].join("|");
+  }
+
+  async function resolvePendingTaskNavigationOnce() {
     let pending = null;
     try {
       pending = await getValue(STORE_KEY_PENDING_TASK_NAVIGATION, null);
@@ -6102,18 +6128,107 @@
       return;
     }
 
-    const delays = [0, 150, 350, 700, 1200, 1800, 2500, 3500, 4500, 5500];
-    for (const delay of delays) {
-      if (delay) await sleepForPendingNavigation(delay);
-      const node = findPendingTaskNode(pending);
-      if (node) {
-        node.classList.add("tg-task-assistant-navigation-highlight");
-        node.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
-        await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
-        return;
-      }
-    }
-    await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
+    const key = pendingNavigationKey(pending);
+    const startedAt = Date.now();
+    const diagnostics = { dataAttrMatches: 0, hrefMatches: 0, titleMatches: 0, attempts: 0 };
+    const expectedPath = `/classrooms/${encodeURIComponent(pending.courseId)}/${pending.taskType}`;
+    console.info("[TG nav] resolver-start", {
+      path: location.pathname,
+      pendingAge: age,
+      key
+    });
+
+    await new Promise(resolve => {
+      const deadline = Math.min(Number(pending.createdAt) + 15000, Date.now() + 15000);
+      let observer = null;
+      let timerId = null;
+      let deadlineTimerId = null;
+      let attemptInFlight = false;
+      let settled = false;
+
+      const cleanup = () => {
+        observer?.disconnect();
+        observer = null;
+        if (timerId !== null) clearInterval(timerId);
+        if (deadlineTimerId !== null) clearTimeout(deadlineTimerId);
+        timerId = null;
+        deadlineTimerId = null;
+      };
+
+      const finish = async result => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        if (result) {
+          const { node, method } = result;
+          console.info("[TG nav] target-found", {
+            method,
+            elapsed: Date.now() - startedAt,
+            taskId: pending.taskId,
+            tag: node.tagName,
+            className: String(node.className || "").slice(0, 160)
+          });
+          if (!node.classList.contains("tg-task-assistant-navigation-highlight")) {
+            node.classList.add("tg-task-assistant-navigation-highlight");
+            console.info("[TG nav] highlight-applied", {
+              count: document.querySelectorAll(".tg-task-assistant-navigation-highlight").length,
+              elapsed: Date.now() - startedAt
+            });
+            node.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+          }
+          await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
+          console.info("[TG nav] resolver-success", { elapsed: Date.now() - startedAt });
+        } else {
+          await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
+          console.warn("[TG nav] resolver-timeout", {
+            path: location.pathname,
+            expectedPath,
+            courseId: pending.courseId,
+            taskType: pending.taskType,
+            taskId: pending.taskId,
+            title: pending.title,
+            elapsed: Date.now() - startedAt,
+            attempts: diagnostics.attempts,
+            dataAttrMatches: diagnostics.dataAttrMatches,
+            hrefMatches: diagnostics.hrefMatches,
+            titleMatches: diagnostics.titleMatches
+          });
+        }
+        resolve();
+      };
+
+      const attempt = async () => {
+        if (settled || attemptInFlight) return;
+        attemptInFlight = true;
+        diagnostics.attempts += 1;
+        try {
+          const result = findPendingTaskNode(pending, diagnostics);
+          if (result?.node?.isConnected) {
+            await finish(result);
+          } else if (Date.now() >= deadline) {
+            await finish(null);
+          }
+        } finally {
+          attemptInFlight = false;
+        }
+      };
+
+      observer = new MutationObserver(() => { attempt(); });
+      observer.observe(document.body || document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["href", "data-id", "data-exercise-id", "data-homework-id"] });
+      timerId = setInterval(attempt, 400);
+      deadlineTimerId = setTimeout(() => { finish(null); }, Math.max(0, deadline - Date.now()));
+      attempt();
+    });
+  }
+
+  function resolvePendingTaskNavigation() {
+    if (pendingNavigationResolvePromise) return pendingNavigationResolvePromise;
+    pendingNavigationResolvePromise = resolvePendingTaskNavigationOnce()
+      .catch(error => console.warn("任务父列表定位失败：", error))
+      .finally(() => {
+        pendingNavigationResolvePromise = null;
+      });
+    return pendingNavigationResolvePromise;
   }
 
   function jumpToTask(task) {
