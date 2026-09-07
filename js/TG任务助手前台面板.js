@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TG任务助手前台面板
 // @namespace    tg-task-monitor-ui
-// @version      3.3
+// @version      3.4
 // @updateURL    https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务助手前台面板.js
 // @downloadURL  https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务助手前台面板.js
 // @description  读取 TG任务状态后台扫描器 的共享结果，在 TG 页面右下角显示任务助手抽屉
@@ -47,6 +47,7 @@
   const STORE_KEY_SHORTCUT = "TG_TASK_ASSISTANT_SHORTCUT";
   const STORE_KEY_LATENCY = "TG_TASK_ASSISTANT_LATENCY";
   const STORE_KEY_PENDING_TASK_NAVIGATION = "TG_TASK_ASSISTANT_PENDING_TASK_NAVIGATION";
+  const STORE_KEY_AUTO_OPEN_SETTINGS = "TG_TASK_ASSISTANT_AUTO_OPEN_SETTINGS";
   const DANGER_DAYS_THRESHOLD = 10;
   const DANGER_NOTIFY_KEY = "TG_TASK_ASSISTANT_DANGER_NOTIFY_KEY";
 
@@ -54,7 +55,6 @@
   const BUTTON_ID = "__tg_task_assistant_button__";
   const DRAWER_ID = "__tg_task_assistant_drawer__";
   const SVG_FILTER_ID = "__tg_liquid_glass_filter__";
-  const OPEN_KEY = "TG_TASK_ASSISTANT_OPEN";
   const FILTER_KEY = "TG_TASK_ASSISTANT_FILTER";
   const COURSE_FOCUS_KEY = "TG_TASK_ASSISTANT_COURSE_FOCUS";
   let countdownIntervalId = null;
@@ -94,6 +94,8 @@
   let adaptiveScrollTimerId = null;
   let adaptiveListenersAttached = false;
   let pendingNavigationResolvePromise = null;
+  const sameParentNavigationFlights = new Map();
+  let pageOpen = false;
   let initialHydrationTraceActive = true;
   const initialHydrationTraceOnce = new Set();
   const LAUNCHER_IDLE_MS = 11000;
@@ -2600,7 +2602,10 @@
     #${DRAWER_ID} .tg2-menu-item:hover { background: rgba(93,193,231,.14); }
     #${DRAWER_ID} .tg2-menu-divider { height: 1px; margin: 6px 4px; background: rgba(182,225,243,.12); }
     #${DRAWER_ID} .tg2-menu-control { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 34px; padding: 0 8px; color: rgba(226,246,255,.84); font-size: 11px; }
+    #${DRAWER_ID} .tg2-menu-control span { min-width: 0; }
+    #${DRAWER_ID} .tg2-menu-control small { display: block; margin-top: 2px; color: var(--tg-fg-tertiary); font-size: 9px; line-height: 1.35; }
     #${DRAWER_ID} .tg2-menu-control select { max-width: 125px; min-height: 28px; border: 1px solid rgba(182,225,243,.18); border-radius: 7px; background: rgba(2,11,20,.76); color: #e5f7ff; font-size: 10px; }
+    #${DRAWER_ID} .tg2-menu-control input[type="checkbox"] { flex: 0 0 auto; accent-color: #6f9dff; }
     #${DRAWER_ID} .tg2-shortcut-state { padding: 4px 8px 7px; color: rgba(169,207,224,.68); font-size: 10px; line-height: 1.45; }
     #${DRAWER_ID} .tg2-footer { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: 0 0 auto; min-height: 42px; padding: 0 18px; border-top: 1px solid rgba(174,220,240,.12); color: rgba(169,207,224,.64); font-size: 10px; }
     #${DRAWER_ID} .tg2-footer button { border: 0; background: transparent; color: rgba(178,222,239,.78); cursor: pointer; font-size: 10px; }
@@ -3667,11 +3672,54 @@
   }
 
   function isOpen() {
-    return localStorage.getItem(OPEN_KEY) === "1";
+    return pageOpen;
   }
 
   function setOpen(value) {
-    localStorage.setItem(OPEN_KEY, value ? "1" : "0");
+    pageOpen = Boolean(value);
+  }
+
+  function normalizeAutoOpenSettings(saved) {
+    const value = saved && typeof saved === "object" ? saved : {};
+    return {
+      home: value.home === undefined ? true : value.home === true,
+      other: value.other === undefined ? false : value.other === true
+    };
+  }
+
+  async function loadAutoOpenSettings() {
+    return normalizeAutoOpenSettings(await getValue(STORE_KEY_AUTO_OPEN_SETTINGS, null));
+  }
+
+  async function saveAutoOpenSettings(patch) {
+    const current = await loadAutoOpenSettings();
+    await setValue(STORE_KEY_AUTO_OPEN_SETTINGS, normalizeAutoOpenSettings({ ...current, ...patch }));
+  }
+
+  function normalizeNavigationPath(pathname) {
+    let path = String(pathname || "/");
+    try {
+      path = decodeURIComponent(path);
+    } catch (_) {}
+    path = path.replace(/\/+/g, "/").replace(/\/+$/, "");
+    return path || "/";
+  }
+
+  function isAssistantHomePage() {
+    const site = getCurrentPageSite();
+    const path = normalizeNavigationPath(location.pathname);
+    if (site.siteKey === "educoder") return path === "/" || path === "/home";
+    if (site.siteKey === "tg-zcst") return path === "/";
+    return false;
+  }
+
+  async function initializePageOpenState() {
+    const settings = await loadAutoOpenSettings();
+    const pageKind = isAssistantHomePage() ? "home" : "other";
+    const autoOpen = pageKind === "home" ? settings.home : settings.other;
+    setOpen(autoOpen);
+    console.info("[TG panel] initial-open", { pageKind, autoOpen });
+    return autoOpen;
   }
 
   function clamp(value, min, max) {
@@ -3818,7 +3866,8 @@
       ignoredTaskMap,
       pinnedCourses,
       launcherSettings,
-      shortcut
+      shortcut,
+      autoOpenSettings
     ] = await Promise.all([
       loadData(),
       getValue(STORE_KEY_LAST_RUNNING, null),
@@ -3835,7 +3884,8 @@
       loadIgnoredTaskMap(),
       loadPinnedCourses(),
       loadLauncherSettings(),
-      loadShortcut()
+      loadShortcut(),
+      loadAutoOpenSettings()
     ]);
     logInitialHydrationCheckpoint("03 state-read-done");
 
@@ -3859,6 +3909,7 @@
       pinnedCourses: normalizeObject(pinnedCourses),
       launcherSettings: normalizeLauncherSettings(launcherSettings),
       shortcut: normalizeShortcut(shortcut),
+      autoOpenSettings: normalizeAutoOpenSettings(autoOpenSettings),
       currentFilter: currentFilter()
     };
   }
@@ -4301,6 +4352,16 @@
 
   async function handlePanelChange(event) {
     const target = event.target;
+    if (target?.matches?.("[data-auto-open-home]")) {
+      await saveAutoOpenSettings({ home: target.checked });
+      render();
+      return;
+    }
+    if (target?.matches?.("[data-auto-open-other]")) {
+      await saveAutoOpenSettings({ other: target.checked });
+      render();
+      return;
+    }
     if (target?.matches?.("[data-semester-upper], [data-semester-lower]")) {
       const root = document.getElementById(ROOT_ID);
       const upper = Number(root?.querySelector("[data-semester-upper]")?.value);
@@ -6045,11 +6106,11 @@
     return value == null ? "" : String(value);
   }
 
-  async function savePendingTaskNavigation(task, type) {
+  function createPendingTaskNavigation(task, type) {
     const taskId = getPendingTaskId(task, type);
     const courseId = resolveJumpCourseId(task);
     if (!taskId || !courseId) throw new Error("任务缺少父列表定位信息");
-    const pending = {
+    return {
       originHost: location.hostname,
       taskType: type,
       courseId: String(courseId),
@@ -6057,6 +6118,10 @@
       title: String(getTaskTitle(task) || "").trim(),
       createdAt: Date.now()
     };
+  }
+
+  async function savePendingTaskNavigation(task, type) {
+    const pending = createPendingTaskNavigation(task, type);
     await setValue(STORE_KEY_PENDING_TASK_NAVIGATION, pending);
     console.info("[TG nav] pending-saved", {
       originHost: pending.originHost,
@@ -6076,7 +6141,7 @@
     const expectedSuffix = `/classrooms/${encodeURIComponent(pending.courseId)}/${pending.taskType}`;
     diagnostics.path = path;
     diagnostics.expectedPath = expectedSuffix;
-    if (path !== expectedSuffix && !path.endsWith(`/${pending.taskType}`)) return null;
+    if (normalizeNavigationPath(path) !== normalizeNavigationPath(expectedSuffix)) return null;
 
     const id = String(pending.taskId);
     const idAttrs = ["data-id", "data-exercise-id", "data-exerciseid", "data-homework-id", "data-homeworkid"];
@@ -6104,12 +6169,96 @@
     return titleNode ? { node: getPendingRow(titleNode), method: "TITLE" } : null;
   }
 
-  function sleepForPendingNavigation(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  function clearNavigationHighlights(nextNode) {
+    document.querySelectorAll(".tg-task-assistant-navigation-highlight").forEach(node => {
+      if (node !== nextNode) node.classList.remove("tg-task-assistant-navigation-highlight");
+    });
+  }
+
+  function applyNavigationHighlight(node) {
+    clearNavigationHighlights(node);
+    const wasHighlighted = node.classList.contains("tg-task-assistant-navigation-highlight");
+    if (!wasHighlighted) node.classList.add("tg-task-assistant-navigation-highlight");
+    node.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+    return {
+      count: document.querySelectorAll(".tg-task-assistant-navigation-highlight").length,
+      applied: !wasHighlighted
+    };
+  }
+
+  async function waitForPendingTask(pending) {
+    const startedAt = Date.now();
+    const diagnostics = { dataAttrMatches: 0, hrefMatches: 0, titleMatches: 0, attempts: 0 };
+    const deadline = Math.min(Number(pending.createdAt) + 15000, Date.now() + 15000);
+
+    return new Promise(resolve => {
+      let observer = null;
+      let timerId = null;
+      let deadlineTimerId = null;
+      let attemptInFlight = false;
+      let settled = false;
+
+      const cleanup = () => {
+        observer?.disconnect();
+        observer = null;
+        if (timerId !== null) clearInterval(timerId);
+        if (deadlineTimerId !== null) clearTimeout(deadlineTimerId);
+        timerId = null;
+        deadlineTimerId = null;
+      };
+
+      const finish = outcome => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve({
+          ...outcome,
+          diagnostics,
+          elapsed: Date.now() - startedAt
+        });
+      };
+
+      const attempt = async () => {
+        if (settled || attemptInFlight) return;
+        attemptInFlight = true;
+        diagnostics.attempts += 1;
+        try {
+          const match = findPendingTaskNode(pending, diagnostics);
+          if (match?.node?.isConnected) {
+            finish({ match, highlight: applyNavigationHighlight(match.node) });
+          } else if (Date.now() >= deadline) {
+            finish({ match: null, highlight: null });
+          }
+        } finally {
+          attemptInFlight = false;
+        }
+      };
+
+      observer = new MutationObserver(() => { attempt(); });
+      observer.observe(document.body || document.documentElement, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ["href", "data-id", "data-exercise-id", "data-homework-id"]
+      });
+      timerId = setInterval(attempt, 400);
+      deadlineTimerId = setTimeout(() => finish({ match: null, highlight: null }), Math.max(0, deadline - Date.now()));
+      attempt();
+    });
   }
 
   function pendingNavigationKey(pending) {
     return [pending?.originHost, pending?.courseId, pending?.taskType, pending?.taskId, pending?.createdAt].join("|");
+  }
+
+  function runSameParentNavigation(pending) {
+    const key = pendingNavigationKey(pending);
+    const active = sameParentNavigationFlights.get(key);
+    if (active) return active;
+    const promise = waitForPendingTask(pending)
+      .finally(() => sameParentNavigationFlights.delete(key));
+    sameParentNavigationFlights.set(key, promise);
+    return promise;
   }
 
   async function resolvePendingTaskNavigationOnce() {
@@ -6129,95 +6278,39 @@
     }
 
     const key = pendingNavigationKey(pending);
-    const startedAt = Date.now();
-    const diagnostics = { dataAttrMatches: 0, hrefMatches: 0, titleMatches: 0, attempts: 0 };
     const expectedPath = `/classrooms/${encodeURIComponent(pending.courseId)}/${pending.taskType}`;
     console.info("[TG nav] resolver-start", {
       path: location.pathname,
       pendingAge: age,
       key
     });
-
-    await new Promise(resolve => {
-      const deadline = Math.min(Number(pending.createdAt) + 15000, Date.now() + 15000);
-      let observer = null;
-      let timerId = null;
-      let deadlineTimerId = null;
-      let attemptInFlight = false;
-      let settled = false;
-
-      const cleanup = () => {
-        observer?.disconnect();
-        observer = null;
-        if (timerId !== null) clearInterval(timerId);
-        if (deadlineTimerId !== null) clearTimeout(deadlineTimerId);
-        timerId = null;
-        deadlineTimerId = null;
-      };
-
-      const finish = async result => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        if (result) {
-          const { node, method } = result;
-          console.info("[TG nav] target-found", {
-            method,
-            elapsed: Date.now() - startedAt,
-            taskId: pending.taskId,
-            tag: node.tagName,
-            className: String(node.className || "").slice(0, 160)
-          });
-          if (!node.classList.contains("tg-task-assistant-navigation-highlight")) {
-            node.classList.add("tg-task-assistant-navigation-highlight");
-            console.info("[TG nav] highlight-applied", {
-              count: document.querySelectorAll(".tg-task-assistant-navigation-highlight").length,
-              elapsed: Date.now() - startedAt
-            });
-            node.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
-          }
-          await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
-          console.info("[TG nav] resolver-success", { elapsed: Date.now() - startedAt });
-        } else {
-          await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
-          console.warn("[TG nav] resolver-timeout", {
-            path: location.pathname,
-            expectedPath,
-            courseId: pending.courseId,
-            taskType: pending.taskType,
-            taskId: pending.taskId,
-            title: pending.title,
-            elapsed: Date.now() - startedAt,
-            attempts: diagnostics.attempts,
-            dataAttrMatches: diagnostics.dataAttrMatches,
-            hrefMatches: diagnostics.hrefMatches,
-            titleMatches: diagnostics.titleMatches
-          });
-        }
-        resolve();
-      };
-
-      const attempt = async () => {
-        if (settled || attemptInFlight) return;
-        attemptInFlight = true;
-        diagnostics.attempts += 1;
-        try {
-          const result = findPendingTaskNode(pending, diagnostics);
-          if (result?.node?.isConnected) {
-            await finish(result);
-          } else if (Date.now() >= deadline) {
-            await finish(null);
-          }
-        } finally {
-          attemptInFlight = false;
-        }
-      };
-
-      observer = new MutationObserver(() => { attempt(); });
-      observer.observe(document.body || document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["href", "data-id", "data-exercise-id", "data-homework-id"] });
-      timerId = setInterval(attempt, 400);
-      deadlineTimerId = setTimeout(() => { finish(null); }, Math.max(0, deadline - Date.now()));
-      attempt();
+    const outcome = await waitForPendingTask(pending);
+    if (outcome.match) {
+      console.info("[TG nav] target-found", {
+        method: outcome.match.method,
+        elapsed: outcome.elapsed,
+        taskId: pending.taskId,
+        tag: outcome.match.node.tagName,
+        className: String(outcome.match.node.className || "").slice(0, 160)
+      });
+      console.info("[TG nav] highlight-applied", { count: outcome.highlight.count, elapsed: outcome.elapsed });
+      await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
+      console.info("[TG nav] resolver-success", { elapsed: outcome.elapsed });
+      return;
+    }
+    await deleteValue(STORE_KEY_PENDING_TASK_NAVIGATION);
+    console.warn("[TG nav] resolver-timeout", {
+      path: location.pathname,
+      expectedPath,
+      courseId: pending.courseId,
+      taskType: pending.taskType,
+      taskId: pending.taskId,
+      title: pending.title,
+      elapsed: outcome.elapsed,
+      attempts: outcome.diagnostics.attempts,
+      dataAttrMatches: outcome.diagnostics.dataAttrMatches,
+      hrefMatches: outcome.diagnostics.hrefMatches,
+      titleMatches: outcome.diagnostics.titleMatches
     });
   }
 
@@ -6236,6 +6329,33 @@
       const type = getJumpType(task);
       if (type === "exercise" || type === "common_homework" || type === "shixun_homework") {
         const url = buildParentListUrl(task);
+        const targetPath = normalizeNavigationPath(new URL(url, location.href).pathname);
+        const currentPath = normalizeNavigationPath(location.pathname);
+        if (currentPath === targetPath) {
+          const pending = createPendingTaskNavigation(task, type);
+          console.info("[TG nav] same-parent-start", {
+            currentPath,
+            targetPath,
+            taskType: pending.taskType,
+            taskId: pending.taskId
+          });
+          runSameParentNavigation(pending).then(outcome => {
+            if (outcome.match) {
+              console.info("[TG nav] same-parent-success", { method: outcome.match.method, elapsed: outcome.elapsed, taskId: pending.taskId });
+            } else {
+              console.warn("[TG nav] same-parent-timeout", {
+                currentPath,
+                targetPath,
+                taskType: pending.taskType,
+                taskId: pending.taskId,
+                title: pending.title,
+                elapsed: outcome.elapsed,
+                attempts: outcome.diagnostics.attempts
+              });
+            }
+          }).catch(error => console.warn("[TG nav] same-parent-timeout", { taskId: pending.taskId, error: error?.message || String(error) }));
+          return;
+        }
         savePendingTaskNavigation(task, type)
           .then(() => {
             writeOutput(url);
@@ -6613,6 +6733,8 @@
       <div class="tg2-menu-divider"></div>
       <div class="tg2-menu-section">显示</div>
       <label class="tg2-menu-control"><span>视觉效果</span><select data-visual-mode><option value="auto" ${settings.visualMode === "auto" ? "selected" : ""}>Auto</option><option value="high" ${settings.visualMode === "high" ? "selected" : ""}>High Quality</option><option value="energy" ${settings.visualMode === "energy" ? "selected" : ""}>Energy Saving</option><option value="static" ${settings.visualMode === "static" ? "selected" : ""}>Static / Off</option></select></label>
+      <label class="tg2-menu-control"><span>首页默认展开<small>打开 TG / 头歌首页时自动展开任务助手</small></span><input type="checkbox" data-auto-open-home ${state?.autoOpenSettings?.home !== false ? "checked" : ""}></label>
+      <label class="tg2-menu-control"><span>其他页面默认展开<small>课程、作业、考试、实验页面自动展开</small></span><input type="checkbox" data-auto-open-other ${state?.autoOpenSettings?.other === true ? "checked" : ""}></label>
       <button class="tg2-menu-item" type="button" data-action="toggle-panel-lock">${settings.locked ? "解锁面板位置" : "锁定面板位置"}<span>${settings.locked ? "已锁定" : "可拖动"}</span></button>
       <button class="tg2-menu-item" type="button" data-action="reset-panel-layout"><span>重置面板位置与大小</span><span>恢复默认</span></button>
       <div class="tg2-menu-divider"></div>
@@ -6849,8 +6971,16 @@
   });
 
   setTimeout(() => {
-    createRoot();
-    render();
+    initializePageOpenState()
+      .then(() => {
+        createRoot();
+        return render();
+      })
+      .catch(error => {
+        console.warn("[TG panel] initial-open failed", error);
+        createRoot();
+        render();
+      });
   }, 1000);
 })();
 
