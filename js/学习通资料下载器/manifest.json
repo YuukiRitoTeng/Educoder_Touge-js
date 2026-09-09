@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "学习通资料归档助手",
+  "version": "0.4.0",
+  "description": "扫描并归档学习通新版资料页中的课程文件。",
+  "permissions": ["downloads", "storage"],
+  "host_permissions": [
+    "https://mooc2-ans.chaoxing.com/*"
+  ],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "action": {
+    "default_title": "学习通资料下载安全确认",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mooc2-ans.chaoxing.com/mooc2-ans/coursedata/stu-datalist*"
+      ],
+      "js": ["content.js", "scanner.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
