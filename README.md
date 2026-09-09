@@ -4,16 +4,18 @@
 
 当前包含两个项目：
 
-- **TG / 头歌任务助手**：ScriptCat / Userscript，当前版本 3.1
+- **TG / 头歌任务助手**：ScriptCat Userscript，当前版本 3.1
 - **学习通资料下载器**：Chrome Manifest V3 Extension，当前版本 0.4.0
 
 ## 下载
 
-| 项目 | 类型 | 版本 | 下载 |
+| 项目 | 类型 | 版本 | 安装 / 下载 |
 | --- | --- | --- | --- |
-| [TG任务助手前台面板](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) | ScriptCat | 3.1 | [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Panel-v3.1.user.js) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) |
-| [TG任务状态后台扫描器](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) | ScriptCat | 3.1 | [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Scanner-v3.1.user.js) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) |
-| [学习通资料下载器](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8) | Chrome MV3 Extension | 0.4.0 | [Release ZIP 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip) |
+| [TG任务助手前台面板](https://scriptcat.org/zh-CN/script-show-page/6322) | ScriptCat Userscript | 3.1 | [ScriptCat 安装](https://scriptcat.org/zh-CN/script-show-page/6322) |
+| [TG任务状态后台扫描器](https://scriptcat.org/zh-CN/script-show-page/6323) | ScriptCat Userscript | 3.1 | [ScriptCat 安装](https://scriptcat.org/zh-CN/script-show-page/6323) |
+| [学习通资料下载器](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8) | Chrome MV3 Extension | 0.4.0 | [GitHub Release ZIP](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip) |
+
+ScriptCat 作者主页：[https://scriptcat.org/zh-CN/users/188482](https://scriptcat.org/zh-CN/users/188482)
 
 ## 项目结构
 
@@ -36,22 +38,36 @@ Browser-Scripts/
 
 ## A. TG / 头歌任务助手
 
-类型：ScriptCat / Userscript
+这是两个配套的 ScriptCat 用户脚本：
 
-当前版本：3.1
+1. TG任务助手前台面板
+2. TG任务状态后台扫描器
 
-两个脚本需要同时安装并启用：
+两个脚本已经发布并同步到 ScriptCat，推荐直接通过 ScriptCat 安装和更新。
 
-- [TG任务助手前台面板.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Panel-v3.1.user.js)
-- [TG任务状态后台扫描器.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Scanner-v3.1.user.js)
+ScriptCat 作者主页：[https://scriptcat.org/zh-CN/users/188482](https://scriptcat.org/zh-CN/users/188482)
 
-安装方法：
+脚本页面：
+
+- TG任务助手前台面板：[ScriptCat 页面](https://scriptcat.org/zh-CN/script-show-page/6322)
+- TG任务状态后台扫描器：[ScriptCat 页面](https://scriptcat.org/zh-CN/script-show-page/6323)
+
+两个脚本都需要安装并启用。推荐从 ScriptCat 安装，后续更新也通过 ScriptCat 获取。GitHub 中的 `.js` 文件主要作为源码查看和版本留档，不再把 GitHub Release 作为 TG 脚本的主要下载渠道。
+
+### 安装
 
 1. 安装 ScriptCat。
-2. 分别打开上面两个 `.js` 文件的 GitHub Raw 地址。
-3. 使用 ScriptCat 安装两个脚本。
-4. 确保两个脚本全部启用。
-5. 登录 TG / Educoder 后进入对应平台使用。
+2. 打开 [TG任务助手前台面板](https://scriptcat.org/zh-CN/script-show-page/6322)。
+3. 安装“TG任务助手前台面板”。
+4. 打开 [TG任务状态后台扫描器](https://scriptcat.org/zh-CN/script-show-page/6323)。
+5. 安装“TG任务状态后台扫描器”。
+6. 确保两个脚本都已启用。
+7. 登录 TG / Educoder 后使用。
+
+GitHub 源码和 Raw 链接仍然保留：
+
+- [TG任务助手前台面板.js 源码](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Raw](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js)
+- [TG任务状态后台扫描器.js 源码](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Raw](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js)
 
 支持入口：
 
@@ -59,7 +75,7 @@ Browser-Scripts/
 - TG 内网：`http://172.16.36.150`
 - Educoder / 头歌公网：`https://www.educoder.net`
 
-两个脚本的详细说明见：[前台面板说明](docs/frontend-panel.md) · [后台扫描器说明](docs/backend-scanner.md)。
+两个脚本的功能包括课程与任务状态扫描、考试/小测试/图文作业汇总、截止时间整理、课程筛选、课程置顶、任务忽略与折叠、刷新状态和网络延迟检测等。详细说明见：[前台面板说明](docs/frontend-panel.md) · [后台扫描器说明](docs/backend-scanner.md)。
 
 ## B. 学习通资料下载器
 
@@ -83,7 +99,7 @@ Browser-Scripts/
 
 ### 安装方法
 
-1. 从 [Release ZIP](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip) 下载 `Chaoxing-Materials-Downloader-v0.4.0.zip`。
+1. 从 [GitHub Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 下载 [Chaoxing-Materials-Downloader-v0.4.0.zip](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip)。
 2. 解压 ZIP。
 3. Chrome 打开 `chrome://extensions`。
 4. 开启“开发者模式”。
@@ -118,4 +134,4 @@ Browser-Scripts/
 
 ## Release
 
-[Browser Scripts - 2026.09](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 包含 TG / 头歌任务助手 v3.1 的两个脚本，以及学习通资料下载器 v0.4.0 的 Chrome 扩展 ZIP。
+[Browser Scripts - 2026.09](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 只提供学习通资料下载器的 Chrome 扩展 ZIP；TG 两个脚本通过 ScriptCat 发布和更新。
