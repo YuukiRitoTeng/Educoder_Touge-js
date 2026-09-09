@@ -11,9 +11,9 @@
 
 | 项目 | 类型 | 版本 | 下载 |
 | --- | --- | --- | --- |
-| [TG任务助手前台面板](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) | ScriptCat | 3.1 | [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) |
-| [TG任务状态后台扫描器](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) | ScriptCat | 3.1 | [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) |
-| [学习通资料下载器](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8) | Chrome MV3 Extension | 0.4.0 | [Release ZIP](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8-v0.4.0.zip) |
+| [TG任务助手前台面板](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) | ScriptCat | 3.1 | [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Panel-v3.1.user.js) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) |
+| [TG任务状态后台扫描器](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) | ScriptCat | 3.1 | [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Scanner-v3.1.user.js) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) |
+| [学习通资料下载器](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8) | Chrome MV3 Extension | 0.4.0 | [Release ZIP 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip) |
 
 ## 项目结构
 
@@ -42,8 +42,8 @@ Browser-Scripts/
 
 两个脚本需要同时安装并启用：
 
-- [TG任务助手前台面板.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js)
-- [TG任务状态后台扫描器.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js)
+- [TG任务助手前台面板.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Panel-v3.1.user.js)
+- [TG任务状态后台扫描器.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Release 下载](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/TG-Task-Scanner-v3.1.user.js)
 
 安装方法：
 
@@ -83,7 +83,7 @@ Browser-Scripts/
 
 ### 安装方法
 
-1. 从 [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 下载 `学习通资料下载器-v0.4.0.zip`。
+1. 从 [Release ZIP](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/Chaoxing-Materials-Downloader-v0.4.0.zip) 下载 `Chaoxing-Materials-Downloader-v0.4.0.zip`。
 2. 解压 ZIP。
 3. Chrome 打开 `chrome://extensions`。
 4. 开启“开发者模式”。
