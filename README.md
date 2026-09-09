@@ -1,198 +1,121 @@
-# Educoder / TG 任务助手
+# Browser Scripts
 
-一个面向 **TG / 头歌（Educoder）课程任务管理** 的双脚本用户脚本项目。
+用于存放个人使用的浏览器用户脚本和 Chrome 扩展。
 
-当前版本：**3.1**
+当前包含两个项目：
 
-项目由两个脚本组成：后台扫描器负责读取课程与任务状态，前台面板负责展示、筛选和交互。两者通过共享存储协同工作。
+- **TG / 头歌任务助手**：ScriptCat / Userscript，当前版本 3.1
+- **学习通资料下载器**：Chrome Manifest V3 Extension，当前版本 0.4.0
 
-> 本项目为个人使用与学习性质的第三方脚本，并非 TG / 头歌官方项目。
+## 下载
 
-## 支持的入口
-
-| 入口 | 地址 | 说明 |
-| --- | --- | --- |
-| TG 外网 | `https://tg.zcst.edu.cn` | 学校 TG 外网入口 |
-| TG 内网 | `http://172.16.36.150` | 学校内网 TG 入口 |
-| 头歌公网 | `https://www.educoder.net` | Educoder / 头歌公网 |
-
-三个入口的登录状态彼此独立：**当前在哪个入口使用，就只需要当前入口本身处于已登录状态，不需要同时登录其它入口。**
-
-## 主要功能
-
-- 扫描正在进行的课程与任务状态
-- 汇总考试、小测试、图文作业等课程任务
-- 按截止时间与状态整理待办、紧急任务等信息
-- 课程筛选、课程置顶、任务忽略与折叠
-- 前台面板展示任务数量、课程信息与刷新状态
-- 支持 TG 外网、TG 内网与头歌公网三入口
-- TG 外网 / 内网共享任务结果，但登录、刷新、错误与运行状态按当前入口隔离
-- 头歌公网使用独立结果存储
-- 支持自定义学期划分
-  - 默认上学期从 **8 月**开始
-  - 默认下学期从 **3 月**开始
-  - 学年与当前学期自动推导
-- 面板支持拖动、调整大小、位置保存等交互
-- 支持任务刷新与网络延迟检测
-- 对临近截止任务提供醒目标识
+| 项目 | 类型 | 版本 | 下载 |
+| --- | --- | --- | --- |
+| [TG任务助手前台面板](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) | ScriptCat | 3.1 | [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) |
+| [TG任务状态后台扫描器](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) | ScriptCat | 3.1 | [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) / [Raw 安装](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) |
+| [学习通资料下载器](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8) | Chrome MV3 Extension | 0.4.0 | [Release ZIP](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/download/2026.09/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8-v0.4.0.zip) |
 
 ## 项目结构
 
 ```text
-Educoder_Touge-js/
+Browser-Scripts/
 ├─ js/
 │  ├─ TG任务助手前台面板.js
-│  └─ TG任务状态后台扫描器.js
-├─ docs/
-│  ├─ frontend-panel.md
-│  └─ backend-scanner.md
-└─ README.md
+│  ├─ TG任务状态后台扫描器.js
+│  └─ 学习通资料下载器/
+│     ├─ manifest.json
+│     ├─ service_worker.js
+│     ├─ content.js
+│     ├─ scanner.js
+│     ├─ popup.html
+│     ├─ popup.js
+│     ├─ README.md
+│     └─ 学习通资料下载器-v0.4.0.zip
+└─ docs/
 ```
 
-`js/` 是当前唯一正式脚本目录。
+## A. TG / 头歌任务助手
 
-## 学习通资料下载器 v0.4.0
+类型：ScriptCat / Userscript
 
-用于学习通新版“资料”页的课程资料扫描与归档，扩展文件位于 [`js/学习通资料下载器/`](js/学习通资料下载器/)。
+当前版本：3.1
 
-安装时打开 Chrome 的“扩展程序”开发者模式，选择“加载已解压的扩展”，并选中该目录。扩展默认将文件保存到 Chrome Downloads 下的相对目录；Automatic Downloads 需要允许学习通站点的多文件下载，危险文件需通过扩展中的“处理安全确认”进入 Chrome 原生确认流程。
+两个脚本需要同时安装并启用：
 
-## 两个脚本分别做什么
+- [TG任务助手前台面板.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E5%8A%A9%E6%89%8B%E5%89%8D%E5%8F%B0%E9%9D%A2%E6%9D%BF.js)
+- [TG任务状态后台扫描器.js 文件页](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js) · [Raw 安装链接](https://raw.githubusercontent.com/YuukiRitoTeng/Browser-Scripts/main/js/TG%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E5%90%8E%E5%8F%B0%E6%89%AB%E6%8F%8F%E5%99%A8.js)
 
-### TG任务助手前台面板
+安装方法：
 
-负责用户界面与交互，包括：
+1. 安装 ScriptCat。
+2. 分别打开上面两个 `.js` 文件的 GitHub Raw 地址。
+3. 使用 ScriptCat 安装两个脚本。
+4. 确保两个脚本全部启用。
+5. 登录 TG / Educoder 后进入对应平台使用。
 
-- 页面右侧 Launcher / 主面板
-- 任务与课程汇总展示
-- 筛选、置顶、忽略、折叠
-- 学期设置
-- 刷新状态与延迟信息
-- 本地 UI 设置持久化
+支持入口：
 
-文件：[`js/TG任务助手前台面板.js`](js/TG任务助手前台面板.js)
+- TG 外网：`https://tg.zcst.edu.cn`
+- TG 内网：`http://172.16.36.150`
+- Educoder / 头歌公网：`https://www.educoder.net`
 
-### TG任务状态后台扫描器
+两个脚本的详细说明见：[前台面板说明](docs/frontend-panel.md) · [后台扫描器说明](docs/backend-scanner.md)。
 
-负责后台数据采集与状态维护，包括：
+## B. 学习通资料下载器
 
-- 获取正在进行的课程
-- 扫描考试、小测试、图文作业等任务
-- 整理 TG / Educoder 数据
-- 保存扫描结果、运行状态与错误状态
-- 响应前台发出的刷新请求
+类型：Chrome Manifest V3 Extension
 
-文件：[`js/TG任务状态后台扫描器.js`](js/TG任务状态后台扫描器.js)
+目录：[`js/学习通资料下载器/`](https://github.com/YuukiRitoTeng/Browser-Scripts/tree/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8/)
 
-## 安装
+当前版本：0.4.0
 
-项目当前按 **ScriptCat（脚本猫）** 的双脚本工作方式设计，建议使用 ScriptCat 安装并运行。
+主要能力：
 
-### 1. 安装 ScriptCat
+- 扫描学习通新版课程“资料”。
+- 保留课程目录层级。
+- 一键批量下载。
+- 使用 Chrome 原生 Download。
+- 自动 Queue / 并发调度。
+- 已完成文件跳过。
+- 文件名冲突时 uniquify。
+- Safe Browsing 危险下载人工确认。
+- 展示下载状态与异常。
 
-先在浏览器中安装 ScriptCat。
+### 安装方法
 
-### 2. 安装两个脚本
+1. 从 [Release](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 下载 `学习通资料下载器-v0.4.0.zip`。
+2. 解压 ZIP。
+3. Chrome 打开 `chrome://extensions`。
+4. 开启“开发者模式”。
+5. 点击“加载已解压的扩展程序”。
+6. 选择刚才解压出来的文件夹。
+7. 登录学习通并进入新版课程“资料”页面。
+8. 点击“扫描全部资料”。
+9. 扫描完成后点击“下载全部”。
 
-两个脚本都需要安装并启用：
+首次批量下载时，Chrome 可能询问是否允许当前学习通网站下载多个文件，请选择允许。
 
-- [TG任务助手前台面板.js](https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务助手前台面板.js)
-- [TG任务状态后台扫描器.js](https://raw.githubusercontent.com/YuukiRitoTeng/Educoder_Touge-js/main/js/TG任务状态后台扫描器.js)
+危险文件可能被 Chrome Safe Browsing 拦截：
 
-只安装前台而不启用后台扫描器时，任务数据无法正常刷新。
+- 扩展会显示“等待安全确认”。
+- 点击“处理安全确认”。
+- 在扩展 Popup 中继续操作。
+- 最终是否允许保存由 Chrome Safe Browsing 决定。
 
-### 3. 登录并打开对应平台
+不要关闭或弱化 Safe Browsing。
 
-登录任意一个你准备使用的入口即可，例如：
+已知限制：
 
-```text
-TG 外网已登录
-→ 可以直接在 TG 外网页面使用
+- 保存位置基于 Chrome Downloads。
+- 暂不支持任意磁盘目录。
+- `tch-courseware` 特殊资源暂不处理。
+- 不使用 aria2 / 本地后端。
+- 不做特殊视频解析。
+- Windows / Chrome 可能规范化部分文件名。
+- Safe Browsing 最终由 Chrome 控制。
 
-TG 内网已登录
-→ 可以直接在 TG 内网页面使用
+更详细的扩展说明见：[`js/学习通资料下载器/README.md`](https://github.com/YuukiRitoTeng/Browser-Scripts/blob/main/js/%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%99%A8/README.md)。
 
-头歌公网已登录
-→ 可以直接在头歌公网使用
-```
+## Release
 
-不需要同时登录三个入口。
-
-### 4. 使用
-
-进入支持的页面后，点击页面右侧的 TG 任务助手入口打开面板，即可查看任务状态、筛选任务或手动刷新数据。
-
-## 学期规则
-
-默认划分：
-
-```text
-8 月 ～ 次年 2 月：上学期
-3 月 ～ 7 月：下学期
-```
-
-例如：
-
-```text
-2026-08 ～ 2027-02
-→ 2026-2027 上学期
-
-2027-03 ～ 2027-07
-→ 2026-2027 下学期
-
-2027-08
-→ 2027-2028 上学期
-```
-
-用户可以在设置中修改“上学期开始月份”和“下学期开始月份”，脚本会根据新的边界自动推导学年与学期。
-
-## 登录与数据隔离
-
-TG 外网和 TG 内网属于同一套 TG 任务数据，因此可以共享上一次扫描结果；但以下运行时状态按入口隔离：
-
-- 登录状态
-- `login_required`
-- 刷新状态
-- 运行状态
-- 错误状态
-
-例如：TG 外网未登录，不会阻止已经登录的 TG 内网页面正常使用。
-
-Educoder / 头歌公网则使用独立结果存储，不与 TG 结果混用。
-
-## 使用说明
-
-- 两个脚本需要保持启用。
-- 后台扫描器依赖当前浏览器已有的登录会话获取课程数据。
-- 如果当前入口未登录，前台不会展示该入口下的旧业务数据作为当前有效结果。
-- 内网入口只有在能够访问学校内网时才可使用。
-- 如果脚本更新后浏览器仍运行旧版本，请优先检查 ScriptCat 中安装的脚本版本与仓库版本是否一致。
-
-## 文档
-
-更详细的脚本说明：
-
-- [前台面板说明](docs/frontend-panel.md)
-- [后台扫描器说明](docs/backend-scanner.md)
-
-## 版本规则
-
-当前正式版本：**3.1**
-
-后续普通修复或小功能更新按小版本递增：
-
-```text
-3.1 → 3.2 → 3.3 → 3.4 ...
-```
-
-只有明确的大版本重构才升级主版本，例如：
-
-```text
-3.x → 4.0
-```
-
-前台与后台两个脚本的 `@version` 应保持一致。
-
-## License
-
-当前仓库暂未声明独立开源许可证。未经明确授权，请不要将代码视为已按某种开源许可证授权。
+[Browser Scripts - 2026.09](https://github.com/YuukiRitoTeng/Browser-Scripts/releases/tag/2026.09) 包含 TG / 头歌任务助手 v3.1 的两个脚本，以及学习通资料下载器 v0.4.0 的 Chrome 扩展 ZIP。
